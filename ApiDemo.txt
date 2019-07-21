@@ -1,0 +1,121 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Mvc;
+using WebApplication1.Models;
+
+namespace WebApplication1.Controllers
+{
+    // [Authorize]
+    
+
+    public class ValuesController : ApiController
+    {
+
+        SqlConnection con;
+        SqlCommand cmd;
+        SqlDataReader dr;
+        DataTable dt;
+        DataSet ds;
+        SqlDataAdapter da;
+        string connectionString = ConfigurationManager.ConnectionStrings["myCon"].ConnectionString;
+
+        // GET api/values
+        public List<EmpModel> Get()
+        {
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand("getalldata",con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            con.Open();
+            dr = cmd.ExecuteReader();
+           
+            List<EmpModel> allitems = new List<EmpModel>();
+            while (dr.Read())
+            {
+                allitems.Add(new EmpModel
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+                    Name=Convert.ToString(dr["Name"]),
+                    Department = Convert.ToString(dr["Department"]),
+                    City=Convert.ToString(dr["City"])
+
+                });
+            }
+            con.Close();
+
+
+            return allitems;
+           
+        }
+
+        // GET api/values/5
+        public EmpModel GetById(int id)
+        {
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand("getalldata", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            con.Open();
+            dr = cmd.ExecuteReader();
+
+            EmpModel allitems = new EmpModel();
+            while (dr.Read())
+            {
+                allitems.Name = Convert.ToString(dr["Name"]);
+                allitems.Department = Convert.ToString(dr["Department"]);
+                allitems.City = Convert.ToString(dr["City"]);
+            }
+            con.Close();
+            return allitems;
+        }
+
+        
+        // POST api/values
+        public EmpModel Post(EmpModel empmodel)
+        {
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand("insertData", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            con.Open();
+            cmd.Parameters.AddWithValue("@Name", empmodel.Name);
+            cmd.Parameters.AddWithValue("@Department", empmodel.Department);
+            cmd.Parameters.AddWithValue("@City", empmodel.City);
+            cmd.ExecuteNonQuery();
+            con.Close();
+            return empmodel;
+        }
+
+        // PUT api/values/5
+        public EmpModel Put(EmpModel empmodel, int id)
+        {
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand("UpdateData", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            con.Open();
+            cmd.Parameters.AddWithValue("@Id", id);
+            cmd.Parameters.AddWithValue("@Name", empmodel.Name);
+            cmd.Parameters.AddWithValue("@Department", empmodel.Department);
+            cmd.Parameters.AddWithValue("@City", empmodel.City);
+            cmd.ExecuteNonQuery();
+            con.Close();
+            return empmodel;
+        }
+
+        // DELETE api/values/5
+        public void Delete(int id)
+        {
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand("sp_Delete", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            con.Open();
+            cmd.Parameters.AddWithValue("@Id", id);
+            cmd.ExecuteNonQuery();
+            con.Close();
+        }
+    }
+}
